@@ -1,14 +1,12 @@
-import xgboost as xgb
+import matplotlib.pyplot as plt
 import pandas as pd
-from sklearn.model_selection import train_test_split
+import xgboost as xgb
 from sklearn.metrics import precision_score, accuracy_score
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from xgboost import plot_tree
-import matplotlib.pyplot as plt
 
 data = pd.read_csv("resources/concatenated_data/concatenated_dataset.csv")
-
-window_sizes = [3, 5, 7, 10, 15, 20, 50, 100]
 
 window_sizes = [3, 5, 7, 10, 15, 20, 50, 100]
 

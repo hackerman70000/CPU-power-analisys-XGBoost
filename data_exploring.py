@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-data = pd.read_csv("resources/prepared_data/dataset1.csv")
+data = pd.read_csv("resources/prepared_data/sample.csv")
 
 data['Color'] = data['Encrypting'].map({True: 'blue', False: 'green'})
 
