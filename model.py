@@ -28,8 +28,7 @@ label = data["Encrypting"]
 label_encoder = LabelEncoder()
 labels = label_encoder.fit_transform(label)
 
-# Perform downsampling of the dominant class
-rus = RandomUnderSampler(random_state=42)
+rus = RandomUnderSampler()
 features_resampled, labels_resampled = rus.fit_resample(features, labels)
 
 X_train, X_test, y_train, y_test = train_test_split(features_resampled, labels_resampled, test_size=0.1)
