@@ -1,5 +1,4 @@
 import os
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import xgboost as xgb
@@ -7,6 +6,7 @@ from sklearn.metrics import precision_score, accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from xgboost import plot_tree
+from imblearn.under_sampling import RandomUnderSampler
 
 file_path = "resources/concatenated_data/concatenated_dataset.csv"
 if not os.path.exists(file_path):
@@ -16,6 +16,7 @@ try:
     data = pd.read_csv(file_path)
 except Exception as e:
     print("Error occurred while reading the CSV file:", e)
+
 window_sizes = [3, 5, 7, 10, 15, 20, 50, 100]
 
 features = data[
@@ -23,15 +24,17 @@ features = data[
         f'WMA_{window_size}' for window_size in window_sizes] + [f'EMA_{window_size}' for window_size in window_sizes]]
 
 label = data["Encrypting"]
+
 label_encoder = LabelEncoder()
 labels = label_encoder.fit_transform(label)
 
-X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.1)
+# Perform downsampling of the dominant class
+rus = RandomUnderSampler(random_state=42)
+features_resampled, labels_resampled = rus.fit_resample(features, labels)
 
-class_weights = {0: 200, 1: 1}
-scale_pos_weight = sum(class_weights.values()) / sum(class_weights.keys())
+X_train, X_test, y_train, y_test = train_test_split(features_resampled, labels_resampled, test_size=0.1)
+model = xgb.XGBClassifier()
 
-model = xgb.XGBClassifier(scale_pos_weight=scale_pos_weight)
 model.fit(X_train, y_train)
 
 predictions = model.predict(X_test)
