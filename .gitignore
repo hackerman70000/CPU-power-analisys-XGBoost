@@ -1,0 +1,10 @@
+venv/
+resources/prepared_data/
+resources/concatenated_data/
+resources/raw_data/*
+!resources/raw_data/sample.csv
+*.zip
+todo.md
+*xml
+*iml
+.idea/

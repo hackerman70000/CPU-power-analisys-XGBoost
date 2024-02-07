@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import xgboost as xgb
@@ -6,8 +8,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from xgboost import plot_tree
 
-data = pd.read_csv("resources/concatenated_data/concatenated_dataset.csv")
+file_path = "resources/concatenated_data/concatenated_dataset.csv"
+if not os.path.exists(file_path):
+    raise FileNotFoundError(f"File '{file_path}' not found. Please make sure the file exists.")
 
+try:
+    data = pd.read_csv(file_path)
+except Exception as e:
+    print("Error occurred while reading the CSV file:", e)
 window_sizes = [3, 5, 7, 10, 15, 20, 50, 100]
 
 features = data[
@@ -34,5 +42,8 @@ print("Precision score: %.2f%%" % (precision * 100.0))
 accuracy = accuracy_score(y_test, predictions)
 print("Accuracy score: %.2f%%" % (accuracy * 100.0))
 
-plot_tree(model)
-plt.show()
+try:
+    plot_tree(model)
+    plt.show()
+except Exception as e:
+    print("Error occurred while plotting tree:", e)

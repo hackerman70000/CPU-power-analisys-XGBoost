@@ -1,30 +1,49 @@
-import os
-import pandas as pd
 import glob
+import os
+import resource
+
 import numpy as np
+import pandas as pd
 
 
 def prepare_dataset(input_folder, output_folder):
     input_path = os.path.join("resources", input_folder)
     output_path = os.path.join("resources", output_folder)
 
+    if not os.path.exists(input_path):
+        raise FileNotFoundError(f"Input folder '{input_path}' not found.")
+
+    if not os.listdir(input_path):
+        raise FileNotFoundError(f"No files found in the input folder '{input_path}'.")
+
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
     files = os.listdir(input_path)
 
-    # Data cleansing
-    for i, file_name in enumerate(files):
-        if file_name.endswith(".csv"):
-            df = pd.read_csv(os.path.join(input_path, file_name))
-            df["Encrypting"] = (df['D0'] == 1) & (df['D1'] == 0)
-            df = df.drop(columns=['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'])
-            new_file_name = f"dataset{i + 1}.csv"
-            calculate_averages(df)
-            df = df.dropna()
-            df.to_csv(os.path.join(output_path, new_file_name), index=False)
-    print("Data enrichment has been completed.")
-    print("Data processing has been completed.")
+    try:
+        # Check RAM usage before processing
+        memory_limit = resource.getrlimit(resource.RLIMIT_AS)[0]
+        current_memory_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
+        if current_memory_usage > 0.9 * memory_limit:
+            raise MemoryError("Exceeded 90% of available memory. Aborting.")
+
+        # Data cleansing
+        for i, file_name in enumerate(files):
+            if file_name.endswith(".csv"):
+                df = pd.read_csv(os.path.join(input_path, file_name))
+                df["Encrypting"] = (df['D0'] == 1) & (df['D1'] == 0)
+                df = df.drop(columns=['D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7'])
+                new_file_name = f"dataset{i + 1}.csv"
+                calculate_averages(df)
+                df = df.dropna()
+                df.to_csv(os.path.join(output_path, new_file_name), index=False)
+        print("Data enrichment has been completed.")
+        print("Data processing has been completed.")
+    except MemoryError as mem_err:
+        print(mem_err)
+    except Exception as e:
+        print("Error occurred during data preparation:", e)
 
 
 def calculate_averages(df):
@@ -50,23 +69,35 @@ def concatenate_datasets(input_folder, output_folder):
     input_path = os.path.join("resources", input_folder)
     output_path = os.path.join("resources", output_folder)
 
+    if not os.path.exists(input_path):
+        raise FileNotFoundError(f"Input folder '{input_path}' not found.")
+
+    if not os.listdir(input_path):
+        raise FileNotFoundError(f"No files found in the input folder '{input_path}'.")
+
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
     files = glob.glob(os.path.join(input_path, "*.csv"))
 
-    dfs = []
+    try:
+        dfs = []
 
-    for file in files:
-        df = pd.read_csv(file)
-        dfs.append(df)
+        for file in files:
+            df = pd.read_csv(file)
+            dfs.append(df)
 
-    data = pd.concat(dfs, ignore_index=True)
-    data.dropna(inplace=True)
-    data.to_csv(os.path.join(output_path, "concatenated_dataset.csv"), index=False)
-    print("Data concatenation has been completed.")
+        data = pd.concat(dfs, ignore_index=True)
+        data.dropna(inplace=True)
+        data.to_csv(os.path.join(output_path, "concatenated_dataset.csv"), index=False)
+        print("Data concatenation has been completed.")
+    except Exception as e:
+        print("Error occurred during data concatenation:", e)
 
 
 if __name__ == "__main__":
-    prepare_dataset("raw_data", "prepared_data")
-    concatenate_datasets("prepared_data", "concatenated_data")
+    try:
+        prepare_dataset("raw_data", "prepared_data")
+        concatenate_datasets("prepared_data", "concatenated_data")
+    except Exception as e:
+        print("An error occurred:", e)

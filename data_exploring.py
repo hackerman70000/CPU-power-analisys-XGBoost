@@ -1,7 +1,11 @@
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 
-data = pd.read_csv("resources/prepared_data/sample.csv")
+try:
+    data = pd.read_csv("resources/prepared_data/sample.csv")
+except FileNotFoundError:
+    print("Error: File not found. Please make sure the file exists.")
+    exit()
 
 data['Color'] = data['Encrypting'].map({True: 'blue', False: 'green'})
 
