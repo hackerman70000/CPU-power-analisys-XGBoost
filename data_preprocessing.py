@@ -1,8 +1,8 @@
-import os
-import pandas as pd
 import glob
+import os
 import numpy as np
-import psutil
+import pandas as pd
+
 
 def prepare_dataset(input_folder, output_folder):
     input_path = os.path.join("resources", input_folder)
@@ -32,6 +32,7 @@ def prepare_dataset(input_folder, output_folder):
     print("Data enrichment has been completed.")
     print("Data processing has been completed.")
 
+
 def calculate_averages(df):
     window_sizes = [3, 5, 7, 10, 15, 20, 50, 100]
 
@@ -49,6 +50,7 @@ def calculate_averages(df):
         # Exponential Moving Average (EMA)
         ema_col_name = f'EMA_{window_size}'
         df[ema_col_name] = df['Current(uA)'].ewm(span=window_size, adjust=False).mean().round(3)
+
 
 def concatenate_datasets(input_folder, output_folder):
     input_path = os.path.join("resources", input_folder)
